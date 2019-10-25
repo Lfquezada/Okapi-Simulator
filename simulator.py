@@ -31,7 +31,7 @@ class Okapi:
     	self.xPos += moveX
     	self.yPos += moveY
 
-    	# terrein restrictions
+    	# terrain restrictions
     	if self.xPos < 0:
     		self.xPos = 1
     	if self.xPos > xMax:
@@ -43,7 +43,7 @@ class Okapi:
     		self.yPos = yMax-1
 
 
-class Terrein:
+class Terrain:
 
 	individuals = []
 
@@ -61,44 +61,52 @@ class Terrein:
 	def update(self):
 		# random individual movement
 		for individual in self.individuals:
-			individual.move(terrein.width,terrein.height)
+			individual.move(terrain.width,terrain.height)
 
 	def printData(self):
 		print('Dimensions X:{} Y:{}\n'.format(self.width,self.height))
 		for individual in self.individuals:
 			print('ID:{} \tX:{} \tY:{} \trFactor:{} \tData:{}'.format(individual.id,individual.xPos,individual.yPos,individual.rFactor,individual))
 
-def animate(frame,terrein):
-	terrein.update()
+def animate(frame,terrain):
+	terrain.update()
 	xs = []
 	ys = []
-	terreinXs = [-3,terrein.width+3,terrein.width+3,-3,-3]
-	terreinYs = [-3,-3,terrein.height+3,terrein.height+3,-3]
+	terrainXs = [-3,terrain.width+3,terrain.width+3,-3,-3]
+	terrainYs = [-3,-3,terrain.height+3,terrain.height+3,-3]
 	
-	for individual in terrein.individuals:
+	for individual in terrain.individuals:
 		xs.append(individual.xPos)
 		ys.append(individual.yPos)
 
 	plt.cla()
-	plt.plot(terreinXs,terreinYs,color='#252525')
+	plt.plot(terrainXs,terrainYs,color='#252525')
 	plt.scatter(xs,ys,color='#FF7700')
+
+	print('[ Alive: {} ]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'.format(len(terrain.individuals)))
+	#print('[ Deaths: {} ]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'.format(len(terrain.individuals)))
 
 
 # Simulator  ---------------------------------------------------------------------
 print("\n    O K A P I   S I M  1.0")
-print("\n|| Building terrein...")
-terrein = Terrein(200,200,20)
-print("\n|| Terrein laid out...")
+print("\n|| Building terrain...")
+terrain = Terrain(200,200,20)
+print("\n|| Terrain laid out...")
 print("\n|| Stating simulation...")
-animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrein],interval=100)
+animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrain],interval=100)
 
 print("\n|| Simulation running...")
 plt.tight_layout()
+plt.title("OKAPI Simulator", fontsize=22)
 plt.gca().axes.get_xaxis().set_visible(False)
 plt.gca().axes.get_yaxis().set_visible(False)
 
 ax = plt.gca()
 ax.set_facecolor('#252525')
+
+fig = plt.gcf()
+fig.canvas.set_window_title('OKAPI Simulator')
+
 
 plt.show()
 
