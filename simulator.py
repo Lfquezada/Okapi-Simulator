@@ -81,7 +81,7 @@ def animate(frame,terrain):
 
 	plt.cla()
 	plt.plot(terrainXs,terrainYs,color='#252525')
-	plt.scatter(xs,ys,color='#FF7700')
+	plt.scatter(xs,ys,color='#00B4EE')
 
 	print('[ Alive: {} ]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'.format(len(terrain.individuals)))
 	#print('[ Deaths: {} ]\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'.format(len(terrain.individuals)))
