@@ -50,15 +50,20 @@ class Okapi:
 
 
 class Terrain:
-	generation = 0
+	cycle = 0
 	totalDeaths = 0
 	individuals = []
+	initFood = {'x':[],'y':[]}
+	currentFood = {'x':[],'y':[]}
 	vegetation = {'x':[],'y':[],'woodYs':[]}
 
-	def __init__(self,height,width,amount):
+	def __init__(self,height,width,populationAmount,vegetationAmount):
 		self.height = height
 		self.width = width
-		self.generateInitPopulation(amount)
+		self.vegetationAmount = vegetationAmount
+		self.generateInitPopulation(populationAmount)
+		self.generateInitVegetation(vegetationAmount)
+		self.spawnInitFood()
 
 	def generateInitPopulation(self,amount):
 		for i in  range(amount):
@@ -66,34 +71,45 @@ class Terrain:
 			randomY = random.randint(0,self.height)
 			self.individuals.append(Okapi(initOkapiSpeed,initOkapiSize,initReplicationFactor,initDeathFactor,randomX,randomY))
 
-		# 1.5 of amount
-		amount = int(amount*1.5)
-
-		for i in range(amount):
+	def generateInitVegetation(self,vegetationAmount):
+		for i in range(vegetationAmount):
 			randomX = random.randint(0,self.width)
 			randomY = random.randint(0,self.height)
 			self.vegetation['x'].append(randomX)
 			self.vegetation['y'].append(randomY)
 			self.vegetation['woodYs'].append(randomY-4)
 
-	def spawnFood(self,amount):
-		# code
+	def spawnInitFood(self):
+		for i in  range(self.vegetationAmount):
+			xPos = self.vegetation['x'][i] - random.randint(1,2)
+			yPos = self.vegetation['y'][i] -4
+			self.initFood['x'].append(xPos)
+			self.initFood['y'].append(yPos)
+
+			xPos = self.vegetation['x'][i] + random.randint(1,2)
+			yPos = self.vegetation['y'][i] -4
+			self.initFood['x'].append(xPos)
+			self.initFood['y'].append(yPos)
+
+	def spawnFood(self):
+		self.currentFood = self.initFood
 
 	def update(self):
-		self.generation += 1
+		self.cycle += 1
+		self.spawnFood()
 
 		# random individual movement
 		for individual in self.individuals:
 			individual.move(terrain.width,terrain.height)
 
 			# Chance to replicate depending on rFactor
-			probabilityFactor = random.randint(1,100)
+			probabilityFactor = random.randint(1,500)
 			if probabilityFactor <= individual.rFactor: 
 				# successful replication, spawns near
 				self.individuals.append(Okapi(initOkapiSpeed,initOkapiSize,initReplicationFactor,initDeathFactor,individual.xPos,individual.yPos))
 
 			# Chance of death depending on rFactor
-			probabilityFactor = random.randint(1,100)
+			probabilityFactor = random.randint(1,750)
 			if probabilityFactor <= individual.deathFactor: 
 				# death
 				self.individuals.remove(individual)
@@ -121,15 +137,15 @@ def animate(frame,terrain):
 		ys.append(individual.yPos)
 
 	plt.cla()
-	plt.title('{}Generation: {}\n[ Alive: {} ][ Deaths: {} ]'.format(
+	plt.title('{}Cycle: {}\n[ Alive: {} ][ Deaths: {} ]'.format(
 		spacer,
-		terrain.generation,
+		terrain.cycle,
 		len(terrain.individuals),
 		terrain.totalDeaths),
 	fontsize=10,
 	loc='left')
 
-	# Anchor points for terrein visual
+	# Anchor points for terrain visual
 	plt.plot(terrainXs,terrainYs,color='#229954')
 
 	# Animals
@@ -139,13 +155,16 @@ def animate(frame,terrain):
 	plt.scatter(terrain.vegetation['x'],terrain.vegetation['woodYs'],c='#47361E',marker='|',s=120)
 	plt.scatter(terrain.vegetation['x'],terrain.vegetation['y'],c='#145A32',marker='^',s=120,linewidths=1,edgecolors='#1D8348')
 
+	# Food
+	plt.scatter(terrain.currentFood['x'],terrain.currentFood['y'],c='#27AE60',marker='d',s=5,linewidths=0.3,edgecolors='#000000')
+
 	#print('{}[ Generation: {} ]\n[ Alive: {} ]\n[ Deaths: {} ]'.format(spacer,terrain.generation,len(terrain.individuals),terrain.totalDeaths))
 
 
 # Simulator  ---------------------------------------------------------------------
 print("\n    O K A P I   S I M  1.0")
 print("\n|| Building terrain...")
-terrain = Terrain(200,200,50)
+terrain = Terrain(200,200,20,75)
 print("\n|| Terrain laid out...")
 print("\n|| Stating simulation...")
 animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrain],interval=10)
