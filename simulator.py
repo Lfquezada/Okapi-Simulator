@@ -103,7 +103,7 @@ class Terrain:
 			individual.move(terrain.width,terrain.height)
 
 			# Chance to replicate depending on rFactor
-			probabilityFactor = random.randint(1,500)
+			probabilityFactor = random.randint(1,1000)
 			if probabilityFactor <= individual.rFactor: 
 				# successful replication, spawns near
 				self.individuals.append(Okapi(initOkapiSpeed,initOkapiSize,initReplicationFactor,initDeathFactor,individual.xPos,individual.yPos))
