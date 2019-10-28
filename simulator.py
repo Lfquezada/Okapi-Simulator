@@ -16,9 +16,9 @@ from matplotlib.animation import FuncAnimation
 
 # Constants
 initReplicationFactor = 3
-initDeathFactor = 1
+initDeathFactor = 5
 initOkapiSpeed = 2
-initOkapiSize = 100
+initOkapiSize = 250
 
 class Okapi:
 
@@ -48,6 +48,22 @@ class Okapi:
     	if self.yPos > yMax:
     		self.yPos = yMax-1
 
+    def eatNearFood(self,food):
+    	for x in food['x']:
+    		for y in food['y']:
+    			deltaX = self.xPos - x
+    			deltaY = self.yPos - y
+    			distance = abs(deltaX**2) + abs(deltaY**2)
+
+    			if distance <= self.speed and self.speed <= 5:
+    				self.speed += 1
+    				self.rFactor += 2
+    				self.size += random.randint(1,2)
+    				individualAte = True
+    				return True
+    			else:
+    				individualAte = False
+    	return individualAte
 
 class Terrain:
 	cycle = 0
@@ -82,12 +98,12 @@ class Terrain:
 	def spawnInitFood(self):
 		for i in  range(self.vegetationAmount):
 			xPos = self.vegetation['x'][i] - random.randint(1,2)
-			yPos = self.vegetation['y'][i] -4
+			yPos = self.vegetation['y'][i] - 4
 			self.initFood['x'].append(xPos)
 			self.initFood['y'].append(yPos)
 
 			xPos = self.vegetation['x'][i] + random.randint(1,2)
-			yPos = self.vegetation['y'][i] -4
+			yPos = self.vegetation['y'][i] - 4
 			self.initFood['x'].append(xPos)
 			self.initFood['y'].append(yPos)
 
@@ -96,20 +112,30 @@ class Terrain:
 
 	def update(self):
 		self.cycle += 1
-		self.spawnFood()
+
+		if self.cycle == 1:
+			self.spawnFood()
+		if self.cycle % 3 == 0:
+			self.spawnFood()
 
 		# random individual movement
 		for individual in self.individuals:
 			individual.move(terrain.width,terrain.height)
 
+			# If food is near, the individual eats it
+			individualAte = individual.eatNearFood(self.currentFood)
+
+			if individualAte == False:
+				individual.deathFactor += 0
+
 			# Chance to replicate depending on rFactor
 			probabilityFactor = random.randint(1,1000)
 			if probabilityFactor <= individual.rFactor: 
 				# successful replication, spawns near
-				self.individuals.append(Okapi(initOkapiSpeed,initOkapiSize,initReplicationFactor,initDeathFactor,individual.xPos,individual.yPos))
+				self.individuals.append(Okapi(random.randint(individual.speed-3,individual.speed-1),200,initReplicationFactor,initDeathFactor,individual.xPos,individual.yPos))
 
 			# Chance of death depending on rFactor
-			probabilityFactor = random.randint(1,750)
+			probabilityFactor = random.randint(1,500)
 			if probabilityFactor <= individual.deathFactor: 
 				# death
 				self.individuals.remove(individual)
@@ -164,7 +190,7 @@ def animate(frame,terrain):
 # Simulator  ---------------------------------------------------------------------
 print("\n    O K A P I   S I M  1.0")
 print("\n|| Building terrain...")
-terrain = Terrain(200,200,20,75)
+terrain = Terrain(200,200,40,75)
 print("\n|| Terrain laid out...")
 print("\n|| Stating simulation...")
 animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrain],interval=10)
@@ -180,6 +206,17 @@ fig = plt.gcf()
 fig.canvas.set_window_title('OKAPI Simulator')
 
 plt.show()
+
+finalSpeeds = []
+finalSizes = []
+
+for i in terrain.individuals:
+	finalSpeeds.append(i.speed)
+	finalSizes.append(i.size)
+
+plt.scatter(finalSpeeds,finalSizes,c='#FF0000',marker='h',linewidths=0.4,edgecolors='b')
+plt.show()
+
 
 print("\n||| Simulation ended.\n")
 
