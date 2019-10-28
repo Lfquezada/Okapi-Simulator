@@ -156,7 +156,7 @@ def animate(frame,terrain):
 	plt.scatter(terrain.vegetation['x'],terrain.vegetation['y'],c='#145A32',marker='^',s=120,linewidths=1,edgecolors='#1D8348')
 
 	# Food
-	plt.scatter(terrain.currentFood['x'],terrain.currentFood['y'],c='#27AE60',marker='d',s=5,linewidths=0.3,edgecolors='#000000')
+	plt.scatter(terrain.currentFood['x'],terrain.currentFood['y'],c='#27AE60',marker='d',s=5,linewidths=0.3,edgecolors='#00461D')
 
 	#print('{}[ Generation: {} ]\n[ Alive: {} ]\n[ Deaths: {} ]'.format(spacer,terrain.generation,len(terrain.individuals),terrain.totalDeaths))
 
