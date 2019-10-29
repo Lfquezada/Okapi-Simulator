@@ -191,7 +191,7 @@ def animate(frame,terrain):
 # Simulator  ---------------------------------------------------------------------
 print("\n    O K A P I   S I M  1.0")
 print("\n|| Building terrain...")
-terrain = Terrain(200,200,20,10)
+terrain = Terrain(200,200,20,75)
 print("\n|| Terrain laid out...")
 print("\n|| Stating simulation...")
 animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrain],interval=1)
