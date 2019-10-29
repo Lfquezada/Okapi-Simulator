@@ -58,7 +58,7 @@ class Okapi:
     			if distance <= self.speed and self.speed <= 5:
     				self.speed += 1
     				self.rFactor += 2
-    				self.size += random.randint(1,2)
+    				self.size += random.randint(1,20)
     				individualAte = True
     				return True
     			else:
@@ -151,20 +151,18 @@ class Terrain:
 			print('ID:{} \tX:{} \tY:{} \trFactor:{} \tData:{}'.format(individual.id,individual.xPos,individual.yPos,individual.rFactor,individual))
 
 def animate(frame,terrain):
-	spacer = '\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n'
 	terrain.update()
 	xs = []
 	ys = []
-	terrainXs = [-3,terrain.width+3,terrain.width+3,-3,-3]
-	terrainYs = [-3,-3,terrain.height+3,terrain.height+3,-3]
+	terrainXs = [-5,terrain.width+5,terrain.width+5,-5,-5]
+	terrainYs = [-5,-5,terrain.height+5,terrain.height+5,-5]
 	
 	for individual in terrain.individuals:
 		xs.append(individual.xPos)
 		ys.append(individual.yPos)
 
 	plt.cla()
-	plt.title('{}Cycle: {}\n[ Alive: {} ][ Deaths: {} ]'.format(
-		spacer,
+	plt.title('Cycle: {}\n[ Alive: {} ][ Deaths: {} ]'.format(
 		terrain.cycle,
 		len(terrain.individuals),
 		terrain.totalDeaths),
@@ -193,7 +191,7 @@ print("\n|| Building terrain...")
 terrain = Terrain(200,200,40,75)
 print("\n|| Terrain laid out...")
 print("\n|| Stating simulation...")
-animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrain],interval=10)
+animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrain],interval=1)
 
 print("\n|| Simulation running...")
 plt.gca().axes.get_xaxis().set_visible(False)
@@ -214,7 +212,7 @@ for i in terrain.individuals:
 	finalSpeeds.append(i.speed)
 	finalSizes.append(i.size)
 
-plt.scatter(finalSpeeds,finalSizes,c='#FF0000',marker='h',linewidths=0.4,edgecolors='b')
+plt.scatter(finalSpeeds,finalSizes,c='r',marker='h',linewidths=0.5,s=10,edgecolors='b')
 plt.show()
 
 
