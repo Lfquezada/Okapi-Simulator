@@ -49,24 +49,28 @@ class Okapi:
     		self.yPos = yMax-1
 
     def eatNearFood(self,food):
+    	individualAte = False
+
     	for x in food['x']:
     		for y in food['y']:
-    			deltaX = self.xPos - x
-    			deltaY = self.yPos - y
-    			distance = abs(deltaX**2) + abs(deltaY**2)
 
-    			if distance <= self.speed and self.speed <= 5:
-    				
-    				speedFactor = random.randint(1,100)
-    				if speedFactor <= 50:
-    					self.speed += 1
+    			xRange = range(self.xPos-self.speed,self.xPos+self.speed+1)
+    			yRange = range(self.yPos-self.speed,self.yPos+self.speed+1)
 
-    				self.rFactor += random.randint(1,4)
-    				self.weight += random.randint(2,5)
-    				individualAte = True
-    				return True
-    			else:
-    				individualAte = False
+    			if (x in xRange and y in yRange):
+    				if self.speed < 5:
+    					speedFactor = random.randint(1,100)
+    					if speedFactor <= 50:
+    						self.speed += 1
+
+    					probabilityFactor = random.randint(1,100)
+    					if probabilityFactor <= 20:
+    						self.deathFactor += 1
+
+    					self.rFactor += random.randint(1,4)
+    					self.weight += random.randint(2,5)
+    					individualAte = True
+    					return True
     	return individualAte
 
 class Terrain:
@@ -130,12 +134,7 @@ class Terrain:
 			individual.move(terrain.width,terrain.height)
 
 			# If food is near, the individual eats it
-			individualAte = individual.eatNearFood(self.currentFood)
-
-			if individualAte == False:
-				probabilityFactor = random.randint(1,100)
-				if probabilityFactor < 40:
-					individual.deathFactor += 1
+			foodCoor = individual.eatNearFood(self.currentFood)
 
 			# Chance to replicate depending on rFactor
 			probabilityFactor = random.randint(1,1000)
@@ -147,6 +146,11 @@ class Terrain:
 			probabilityFactor = random.randint(1,1000)
 			if probabilityFactor <= individual.deathFactor: 
 				# death
+				self.individuals.remove(individual)
+				self.totalDeaths += 1
+
+			# Death by excess weight
+			if individual.weight > 350:
 				self.individuals.remove(individual)
 				self.totalDeaths += 1
 
@@ -194,6 +198,8 @@ print("\n|| Building terrain...")
 terrain = Terrain(200,200,20,75)
 print("\n|| Terrain laid out...")
 print("\n|| Stating simulation...")
+
+#plt.style.use('dark_background')
 animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrain],interval=1)
 
 print("\n|| Simulation running...")
@@ -221,20 +227,23 @@ for i in terrain.individuals:
 for i in range(0,terrain.cycle):
 	indexes.append(i+1)
 
+plt.style.use('dark_background')
+
 fig,axs = plt.subplots(2, constrained_layout=True)
-axs[0].scatter(finalSpeeds,finalWeights,c='#C42B2B',marker='.',s=15)
 axs[0].set_title('Speeds vs. Weights')
 axs[0].set_xlabel('Speed (unit/cycle)')
 axs[0].set_ylabel('Weight (kg)')
-axs[0].set_facecolor('#3B3B3B')
+axs[0].set_facecolor('#000000')
 fig.suptitle('Simulation Results',fontsize=12)
 fig.canvas.set_window_title('OKAPI Simulator')
 
-axs[1].plot(indexes,terrain.currentPopulation,c='#C42B2B')
 axs[1].set_title('Cycle vs. Population')
 axs[1].set_xlabel('Cycle')
 axs[1].set_ylabel('Population')
-axs[1].set_facecolor('#3B3B3B')
+axs[1].set_facecolor('#000000')
+
+axs[0].scatter(finalSpeeds,finalWeights,c='#3AFF00',marker='.',s=15,alpha=0.5)
+axs[1].fill_between(indexes,terrain.currentPopulation,0,color='#3AFF00',alpha=0.5)
 
 plt.show()
 
