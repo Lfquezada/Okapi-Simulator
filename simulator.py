@@ -247,7 +247,7 @@ def animate(frame,terrain):
 	plt.scatter(xs,ys,c='#352510',marker='1',s=75)
 
 	# Predators
-	plt.scatter(leopardXs,leopardYs,c='#bf891d',marker='v',s=70,alpha=0.9,linewidths=0.2,edgecolors='#ab7a1a')
+	plt.scatter(leopardXs,leopardYs,c='#bf891d',marker='v',s=70,alpha=0.8,linewidths=0.2,edgecolors='#bf891d')
 
 	# Vegetation
 	plt.scatter(terrain.vegetation['x'],terrain.vegetation['woodYs'],c='#47361E',marker='|',s=120)
