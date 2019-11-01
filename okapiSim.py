@@ -15,7 +15,9 @@ import argparse
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 
-# Constants
+random.seed(5)
+
+# Initial Values
 initReplicationFactor = 4
 initDeathFactor = 1
 initOkapiSpeed = 2
@@ -67,7 +69,7 @@ class Okapi:
     					self.weight += random.randint(2,4)
     					return (x,y)
     	probabilityFactor = random.randint(1,100)
-    	if probabilityFactor <= 25:
+    	if probabilityFactor <= 10:
     		self.deathFactor += 1
     	return (-1,-1)
 
@@ -83,6 +85,32 @@ class Leopard:
     def move(self,xMax,yMax):
     	moveX = random.randint(-1*self.speed,self.speed)
     	moveY = random.randint(-1*self.speed,self.speed)
+    	self.xPos += moveX
+    	self.yPos += moveY
+
+    	# terrain restrictions
+    	if self.xPos < 0:
+    		self.xPos = 1
+    	if self.xPos > xMax:
+    		self.xPos = xMax-1
+
+    	if self.yPos < 0:
+    		self.yPos = 1
+    	if self.yPos > yMax:
+    		self.yPos = yMax-1
+
+
+class Hunter:
+
+    def __init__(self,gunRange,xPos,yPos):
+    	# Creation genotypes are assigned
+    	self.gunRange = gunRange
+    	self.xPos = xPos
+    	self.yPos = yPos
+
+    def move(self,xMax,yMax):
+    	moveX = random.randint(1,2)
+    	moveY = random.randint(1,2)
     	self.xPos += moveX
     	self.yPos += moveY
 
@@ -181,12 +209,14 @@ class Terrain:
 
 			# Death chances increase by excess weight
 			if individual.weight in range(250,300):
-				individual.deathFactor += 1
+				individual.deathFactor += random.randint(0,1)
 			if individual.weight in range(300,325):
-				individual.deathFactor += 2
+				individual.deathFactor += 1
 			if individual.weight in range(325,350):
+				individual.deathFactor += 2
+			if individual.weight in range(350,400):
 				individual.deathFactor += 10
-			if individual.weight >= 350:
+			if individual.weight >= 400:
 				individual.deathFactor += 50
 
 			individualKilled = False
