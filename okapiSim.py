@@ -112,36 +112,38 @@ class Leopard:
 
 
 class Hunter:
+	isAvailableToHunt = True
+	lastHuntCycle = 0
 
 	# Creation traits are assigned
-    def __init__(self,gunRange,xPos,yPos):
-    	# Creation genotypes are assigned
-    	self.gunRange = gunRange
-    	self.xPos = xPos
-    	self.yPos = yPos
+	def __init__(self,gunRange,xPos,yPos):
+		self.gunRange = gunRange
+		self.xPos = xPos
+		self.yPos = yPos
 
-    # Hunter movement is random in all directions
-    def move(self,xMax,yMax):
-    	moveX = random.randint(-2,2)
-    	moveY = random.randint(-2,2)
-    	self.xPos += moveX
-    	self.yPos += moveY
+	# Hunter movement is random in all directions
+	def move(self,xMax,yMax):
+		moveX = random.randint(-2,2)
+		moveY = random.randint(-2,2)
+		self.xPos += moveX
+		self.yPos += moveY
 
-    	# terrain restrictions
-    	if self.xPos < 0:
-    		self.xPos = 1
-    	if self.xPos > xMax:
-    		self.xPos = xMax-1
+		# terrain restrictions
+		if self.xPos < 0:
+			self.xPos = 1
+		if self.xPos > xMax:
+			self.xPos = xMax-1
 
-    	if self.yPos < 0:
-    		self.yPos = 1
-    	if self.yPos > yMax:
-    		self.yPos = yMax-1
+		if self.yPos < 0:
+			self.yPos = 1
+		if self.yPos > yMax:
+			self.yPos = yMax-1
 
 
 class Terrain:
 	cycle = 0
 	totalDeaths = 0
+	totalBirths = 0
 	individuals = []
 	predators = []
 	hunters = []
@@ -223,7 +225,11 @@ class Terrain:
 		for hunter in self.hunters:
 			hunter.move(terrain.width,terrain.height)
 
-		# Okapis move
+			# After a hunters kills an okapi, it takes 4 cycles to reset (cooldown)
+			if self.cycle - hunter.lastHuntCycle == 4:
+				hunter.isAvailableToHunt = True
+
+		# Okapis move, reproduce and can be hunted
 		for individual in self.individuals:
 			individual.move(terrain.width,terrain.height)
 
@@ -235,6 +241,7 @@ class Terrain:
 			if probabilityFactor <= individual.rFactor: 
 				# successful reproduction, child spawns near
 				self.individuals.append(Okapi(1,200,initReplicationFactor,initDeathFactor,individual.xPos,individual.yPos))
+				self.totalBirths += 1
 
 			# Death chances increase by excess weight
 			if individual.weight in range(250,300):
@@ -248,20 +255,38 @@ class Terrain:
 			if individual.weight >= 400:
 				individual.deathFactor += 50
 
-			# Check if a leopard is near enough to eat an okapi
 			individualKilled = False
-			for leopard in self.predators:
-				# Leopard eating range depends on its speed
-				leopardXRange = range(leopard.xPos-leopard.speed,leopard.xPos+leopard.speed+1)
-				leopardYRange = range(leopard.yPos-leopard.speed,leopard.yPos+leopard.speed+1)
 
-				if (individual.xPos in leopardXRange and individual.yPos in leopardYRange):
-					# death by leopard
-					self.individuals.remove(individual)
-					self.totalDeaths += 1 # to keep track of deaths
-					individualKilled = True
-					leopard.xPos = individual.xPos
-					leopard.yPos = individual.yPos
+			# Check if a hunter is able to shoot (hunt every 3 cycles) an Okapi if it is in the gun range
+			if self.huntersAmount != 0:
+				for hunter in self.hunters:
+					if hunter.isAvailableToHunt:
+						huntXRange = range(hunter.xPos-hunter.gunRange,hunter.xPos+hunter.gunRange+1)
+						huntYRange = range(hunter.yPos-hunter.gunRange,hunter.yPos+hunter.gunRange+1)
+
+						if (individual.xPos in huntXRange and individual.yPos in huntYRange):
+							# death by a hunter
+							self.individuals.remove(individual)
+							self.totalDeaths += 1 # to keep track of deaths
+							individualKilled = True
+							hunter.lastHuntCycle = self.cycle
+							hunter.isAvailableToHunt = False
+
+			# Check if a leopard is near enough to eat an okapi
+			if self.predatorsAmount != 0:
+				if not individualKilled:
+					for leopard in self.predators:
+						# Leopard eating range depends on its speed
+						leopardXRange = range(leopard.xPos-leopard.speed,leopard.xPos+leopard.speed+1)
+						leopardYRange = range(leopard.yPos-leopard.speed,leopard.yPos+leopard.speed+1)
+
+						if (individual.xPos in leopardXRange and individual.yPos in leopardYRange):
+							# death by leopard
+							self.individuals.remove(individual)
+							self.totalDeaths += 1 # to keep track of deaths
+							individualKilled = True
+							leopard.xPos = individual.xPos
+							leopard.yPos = individual.yPos
 
 			# Chance of death depending on deathFactor (natural cause) if not killed by a predator
 			if not individualKilled:
@@ -300,14 +325,15 @@ def animate(frame,terrain):
 	for hunter in terrain.hunters:
 		huntersXs.append(hunter.xPos)
 		huntersYs.append(hunter.yPos)
-		huntersHeads.append(hunter.yPos+6)
+		huntersHeads.append(hunter.yPos+5)
 		huntersArms.append(hunter.yPos+2)
 
 	# clear previous graphed data and update the title display
 	plt.cla()
-	plt.title('Cycle: {}\n[ Alive: {} ][ Deaths: {} ]'.format(
+	plt.title('Cycle: {}\n[ Alive: {} ] [ Births: {} ] [ Deaths: {} ]'.format(
 		terrain.cycle,
 		len(terrain.individuals),
+		terrain.totalBirths,
 		terrain.totalDeaths),
 	fontsize=10,
 	loc='left')
@@ -322,9 +348,9 @@ def animate(frame,terrain):
 	plt.scatter(leopardXs,leopardYs,c='#bf891d',marker='v',s=70,alpha=0.9,linewidths=0.2,edgecolors='#bf891d')
 
 	# Hunters
-	plt.scatter(huntersXs,huntersYs,c='#c40a0a',marker='2',s=70,alpha=0.8)
-	plt.scatter(huntersXs,huntersHeads,c='#c40a0a',marker='.',s=60,alpha=0.8)
-	plt.scatter(huntersXs,huntersArms,c='#c40a0a',marker='_',s=45,alpha=0.8)
+	plt.scatter(huntersXs,huntersYs,c='#05336e',marker='2',s=60,alpha=0.8)
+	plt.scatter(huntersXs,huntersHeads,c='#05336e',marker='.',s=50,alpha=0.8)
+	plt.scatter(huntersXs,huntersArms,c='#05336e',marker='_',s=30,alpha=0.8)
 
 	# Vegetation
 	plt.scatter(terrain.vegetation['x'],terrain.vegetation['woodYs'],c='#47361E',marker='|',s=120)
@@ -348,7 +374,8 @@ terrain = Terrain(200,200,int(args.okapis),int(args.trees),int(args.predators),i
 print("\n|| Terrain laid out...")
 print("\n|| Stating simulation...")
 
-plt.style.use('dark_background')
+#plt.style.use('fivethirtyeight')
+
 # Simulation starts until stopped
 animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrain],interval=1)
 
@@ -372,6 +399,7 @@ finalSpeeds = []
 finalWeights = []
 indexes = []
 
+# Retreive the final stored data
 for i in terrain.individuals:
 	finalSpeeds.append(i.speed)
 	finalWeights.append(i.weight)
@@ -383,13 +411,13 @@ for i in range(0,terrain.cycle):
 plt.style.use('dark_background')
 fig,axs = plt.subplots(2, constrained_layout=True)
 
-# Traits graph
+# Traits evolution graph
 axs[0].set_title('Speeds vs. Weights')
 axs[0].set_xlabel('Speed (unit/cycle)')
 axs[0].set_ylabel('Weight (kg)')
 axs[0].set_facecolor('#000000')
 
-fig.suptitle('Simulation Results',fontsize=12)
+fig.suptitle('Simulation Results\n[Input] Okapis: {}    Trees: {}    Predators: {}    Hunters: {}'.format(args.okapis,args.trees,args.predators,args.hunters),fontsize=12)
 fig.canvas.set_window_title('OKAPI Simulator')
 
 # Population over time graph
@@ -402,6 +430,7 @@ axs[1].set_facecolor('#000000')
 axs[0].scatter(finalSpeeds,finalWeights,c='#3AFF00',marker='.',s=100,alpha=0.5)
 axs[1].fill_between(indexes,terrain.currentPopulation,0,color='#3AFF00',alpha=0.5)
 
+print("\n|| Showing final results...")
 plt.show()
-print("\n|| Showing final results...\n")
+print("\n|| Closed.\n")
 
