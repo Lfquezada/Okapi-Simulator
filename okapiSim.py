@@ -153,12 +153,13 @@ class Terrain:
 	vegetation = {'x':[],'y':[],'woodYs':[]}
 
 	# Terrain is given a size and the amount of okapis, trees, predators and hunters to start the simulation
-	def __init__(self,height,width,populationAmount,vegetationAmount,predatorsAmount,huntersAmount):
+	def __init__(self,height,width,populationAmount,vegetationAmount,predatorsAmount,huntersAmount, endCycle):
 		self.height = height
 		self.width = width
 		self.huntersAmount = huntersAmount
 		self.vegetationAmount = vegetationAmount
 		self.predatorsAmount = predatorsAmount
+		self.endCycle = endCycle
 		self.generateInitPopulation(populationAmount)
 		self.generateInitVegetation()
 		self.spawnInitFood()
@@ -298,6 +299,7 @@ class Terrain:
 
 # Global function that plots and draws all the data in a plane (GUI)
 def animate(frame,terrain):
+	global animationCycle
 	terrain.update() # all information of the simulation updates
 	
 	# Arrays to plot data
@@ -359,18 +361,23 @@ def animate(frame,terrain):
 	# Food
 	plt.scatter(terrain.currentFood['x'],terrain.currentFood['y'],c='#27AE60',marker='d',s=5,linewidths=0.3,edgecolors='#00461D')
 
+	if terrain.cycle == terrain.endCycle:
+		animationCycle.event_source.stop()
+		plt.close()
+
 
 # Simulator  ---------------------------------------------------------------------
 parser = argparse.ArgumentParser()
 parser.add_argument('okapis',help='Number of Okapis to spawn.')
 parser.add_argument('trees',help='Number of trees to spawn.')
 parser.add_argument('predators',help='Number of predators to spawn.')
-parser.add_argument('hunters',help='Number of hunters to spawn')
+parser.add_argument('hunters',help='Number of hunters to spawn.')
+parser.add_argument('endCycle',help='Number cycles to simulate.')
 args = parser.parse_args()
 
 print("\n    O K A P I   S I M  1.0")
 print("\n|| Building terrain...")
-terrain = Terrain(200,200,int(args.okapis),int(args.trees),int(args.predators),int(args.hunters))
+terrain = Terrain(200,200,int(args.okapis),int(args.trees),int(args.predators),int(args.hunters),int(args.endCycle))
 print("\n|| Terrain laid out...")
 print("\n|| Stating simulation...")
 
@@ -391,6 +398,7 @@ fig.canvas.set_window_title('OKAPI Simulator')
 
 plt.show()
 print("\n|| Simulation ended.")
+
 
 # Final Results ------------------------------------------------------------------
 
