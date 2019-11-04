@@ -300,7 +300,10 @@ class Terrain:
 # Global function that plots and draws all the data in a plane (GUI)
 def animate(frame,terrain):
 	global animationCycle
-	terrain.update() # all information of the simulation updates
+	global allSpeeds
+	global allWeights
+	cycleSpeeds = []
+	cycleWeights = []
 	
 	# Arrays to plot data
 	xs = []
@@ -319,6 +322,10 @@ def animate(frame,terrain):
 	for individual in terrain.individuals:
 		xs.append(individual.xPos)
 		ys.append(individual.yPos)
+		cycleSpeeds.append(individual.speed)
+		cycleWeights.append(individual.weight)
+	allSpeeds.append(cycleSpeeds)
+	allWeights.append(cycleWeights)
 
 	for leopard in terrain.predators:
 		leopardXs.append(leopard.xPos)
@@ -361,9 +368,34 @@ def animate(frame,terrain):
 	# Food
 	plt.scatter(terrain.currentFood['x'],terrain.currentFood['y'],c='#27AE60',marker='d',s=5,linewidths=0.3,edgecolors='#00461D')
 
+	terrain.update() # all information of the simulation updates
+
 	if terrain.cycle == terrain.endCycle:
 		animationCycle.event_source.stop()
 		plt.close()
+
+# Global function that draws the final results animated (GUI)
+def animateFinal(i):
+	global finalAnimationCycle
+	global allSpeeds
+	global allWeights
+	global allPopulations
+	global indexes
+	global cont
+	global fig
+	global axs
+
+	# clear previous graphed data and update the title display
+	plt.cla()
+
+	# Plot the data
+	axs[0].scatter(allSpeeds[cont],allWeights[cont],c='#3AFF00',marker='.',s=100,alpha=0.5)
+	axs[1].fill_between(indexes[0:cont+1],allPopulations[0:cont+1],0,color='#3AFF00',alpha=0.5)
+
+	if cont == (len(allSpeeds)-1):
+		finalAnimationCycle.event_source.stop()
+	else:
+		cont += 1
 
 
 # Simulator  ---------------------------------------------------------------------
@@ -379,6 +411,8 @@ print("\n    O K A P I   S I M  1.0")
 print("\n|| Building terrain...")
 terrain = Terrain(200,200,int(args.okapis),int(args.trees),int(args.predators),int(args.hunters),int(args.endCycle))
 print("\n|| Terrain laid out...")
+allSpeeds = []
+allWeights = []
 print("\n|| Stating simulation...")
 
 #plt.style.use('fivethirtyeight')
@@ -399,23 +433,15 @@ fig.canvas.set_window_title('OKAPI Simulator')
 plt.show()
 print("\n|| Simulation ended.")
 
-
 # Final Results ------------------------------------------------------------------
 
 # To display the trais from the final population
-finalSpeeds = []
-finalWeights = []
 indexes = []
-
-# Retreive the final stored data
-for i in terrain.individuals:
-	finalSpeeds.append(i.speed)
-	finalWeights.append(i.weight)
+allPopulations = terrain.currentPopulation
 
 for i in range(0,terrain.cycle):
-	indexes.append(i+1)
+	indexes.append(i)
 
-# Results graphs customizations
 plt.style.use('dark_background')
 fig,axs = plt.subplots(2, constrained_layout=True)
 
@@ -434,9 +460,8 @@ axs[1].set_xlabel('Cycle')
 axs[1].set_ylabel('Population')
 axs[1].set_facecolor('#000000')
 
-# Plot the data
-axs[0].scatter(finalSpeeds,finalWeights,c='#3AFF00',marker='.',s=100,alpha=0.5)
-axs[1].fill_between(indexes,terrain.currentPopulation,0,color='#3AFF00',alpha=0.5)
+cont = 0
+finalAnimationCycle = FuncAnimation(plt.gcf(),animateFinal,interval=100)
 
 print("\n|| Showing final results...")
 plt.show()
