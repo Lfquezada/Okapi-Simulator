@@ -239,13 +239,6 @@ class Terrain:
 			# If food is near, the okapi eats it
 			foodX,foodY = individual.eatNearFood(self.currentFood)
 
-			# Chance for reproduction depending on rFactor
-			probabilityFactor = random.randint(1,1000)
-			if probabilityFactor <= individual.rFactor: 
-				# successful reproduction, child spawns near
-				self.individuals.append(Okapi(1,200,initReplicationFactor,initDeathFactor,individual.xPos,individual.yPos))
-				self.totalBirths += 1
-
 			# Death chances increase by excess weight
 			if individual.weight in range(250,300):
 				individual.deathFactor += random.randint(0,1)
@@ -285,11 +278,12 @@ class Terrain:
 
 						if (individual.xPos in leopardXRange and individual.yPos in leopardYRange):
 							# death by leopard
-							self.individuals.remove(individual)
-							self.totalDeaths += 1 # to keep track of deaths
-							individualKilled = True
-							leopard.xPos = individual.xPos
-							leopard.yPos = individual.yPos
+							if individualKilled == False:
+								self.individuals.remove(individual)
+								self.totalDeaths += 1 # to keep track of deaths
+								individualKilled = True
+								leopard.xPos = individual.xPos
+								leopard.yPos = individual.yPos
 
 			# Chance of death depending on deathFactor (natural cause) if not killed by a predator
 			if not individualKilled:
@@ -297,7 +291,16 @@ class Terrain:
 				if probabilityFactor <= individual.deathFactor: 
 					# death by natural chances (influenced by excess weight or not enough food)
 					self.individuals.remove(individual)
+					individualKilled = True
 					self.totalDeaths += 1
+
+			if not individualKilled:
+				# Chance for reproduction depending on rFactor
+				probabilityFactor = random.randint(1,1000)
+				if probabilityFactor <= individual.rFactor: 
+					# successful reproduction, child spawns near
+					self.individuals.append(Okapi(1,200,initReplicationFactor,initDeathFactor,individual.xPos,individual.yPos))
+					self.totalBirths += 1
 
 
 # Useful function to print the main statistics for a data set
