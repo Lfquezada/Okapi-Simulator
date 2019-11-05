@@ -361,7 +361,7 @@ def animate(frame,terrain):
 	loc='left')
 
 	# Anchor points for terrain visual
-	plt.plot(terrainXs,terrainYs,color='#229954',alpha=0.0)
+	plt.plot(terrainXs,terrainYs,color='#000000',alpha=0.0)
 
 	# Animals
 	plt.scatter(xs,ys,c='#352510',marker='1',s=75)
