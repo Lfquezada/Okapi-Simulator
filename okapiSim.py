@@ -15,6 +15,8 @@ import random
 import argparse
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
+import numpy as np
+from scipy import stats
 
 # Random seed
 random.seed(5)
@@ -66,9 +68,9 @@ class Okapi:
 
     			# if food is near the okapi eats
     			if (x in xRange and y in yRange):
-    				if self.speed < 5: # 5 speed limit
+    				if self.speed < 6: # 6 speed limit (because Okapis real max speed is 60km/h)
     					speedFactor = random.randint(1,100) # to make speed not so easy to obtain thus more diversity
-    					if speedFactor <= 25: # 25%
+    					if speedFactor <= 35:
     						self.speed += 1
 
     					self.rFactor += random.randint(1,2) # eating increases chances of reproduction
@@ -297,11 +299,19 @@ class Terrain:
 					self.individuals.remove(individual)
 					self.totalDeaths += 1
 
+
+# Useful function to print the main statistics for a data set
+def printStats(data):
+	print('MAX:\t{}'.format(max(data)))
+	print('MIN:\t{}'.format(min(data)))
+	print('MEAN:\t{}'.format(np.mean(data)))
+	print('MEDIAN:\t{}'.format(np.median(data)))
+	print('MODE:\t{}'.format(stats.mode(data)[0][0]))
+	print('STD:\t{}'.format(np.std(data)))
+
 # Global function that plots and draws all the data in a plane (GUI)
 def animate(frame,terrain):
-	global animationCycle
-	global allSpeeds
-	global allWeights
+	global animationCycle, allSpeeds, allWeights
 	cycleSpeeds = []
 	cycleWeights = []
 	
@@ -348,7 +358,7 @@ def animate(frame,terrain):
 	loc='left')
 
 	# Anchor points for terrain visual
-	plt.plot(terrainXs,terrainYs,color='#229954')
+	plt.plot(terrainXs,terrainYs,color='#229954',alpha=0.0)
 
 	# Animals
 	plt.scatter(xs,ys,c='#352510',marker='1',s=75)
@@ -376,20 +386,28 @@ def animate(frame,terrain):
 
 # Global function that draws the final results animated (GUI)
 def animateFinal(i):
-	global finalAnimationCycle
-	global allSpeeds
-	global allWeights
-	global allPopulations
-	global indexes
-	global cont
-	global fig
-	global axs
+	global finalAnimationCycle, allSpeeds, allWeights, allPopulations, indexes, cont, fig, axs, ax1Anchors, ax2Anchors
 
 	# clear previous graphed data and update the title display
-	plt.cla()
+	axs[0].cla()
+	axs[1].cla()
+
+	# Traits evolution graph
+	axs[0].set_title('Speeds vs. Weights')
+	axs[0].set_xlabel('Speed (unit/cycle)')
+	axs[0].set_ylabel('Weight (kg)')
+
+	# Population over time graph
+	axs[1].set_title('Cycle vs. Population')
+	axs[1].set_xlabel('Cycle')
+	axs[1].set_ylabel('Population')
+
+	# Plot anchor points
+	axs[0].scatter(ax1Anchors['x'],ax1Anchors['y'],c='#000000',alpha=0.0)
+	axs[1].scatter(ax2Anchors['x'],ax2Anchors['y'],c='#000000',alpha=0.0)
 
 	# Plot the data
-	axs[0].scatter(allSpeeds[cont],allWeights[cont],c='#3AFF00',marker='.',s=100,alpha=0.5)
+	axs[0].scatter(allSpeeds[cont],allWeights[cont],c='#3AFF00',marker='.',s=100,alpha=0.2)
 	axs[1].fill_between(indexes[0:cont+1],allPopulations[0:cont+1],0,color='#3AFF00',alpha=0.5)
 
 	if cont == (len(allSpeeds)-1):
@@ -418,7 +436,7 @@ print("\n|| Stating simulation...")
 #plt.style.use('fivethirtyeight')
 
 # Simulation starts until stopped
-animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrain],interval=1)
+animationCycle = FuncAnimation(plt.gcf(),animate,fargs=[terrain],interval=1,cache_frame_data=False)
 
 print("\n|| Simulation running...")
 
@@ -440,30 +458,45 @@ indexes = []
 allPopulations = terrain.currentPopulation
 
 for i in range(0,terrain.cycle):
-	indexes.append(i)
+	indexes.append(i+1)
 
 plt.style.use('dark_background')
 fig,axs = plt.subplots(2, constrained_layout=True)
 
-# Traits evolution graph
-axs[0].set_title('Speeds vs. Weights')
-axs[0].set_xlabel('Speed (unit/cycle)')
-axs[0].set_ylabel('Weight (kg)')
-axs[0].set_facecolor('#000000')
-
 fig.suptitle('Simulation Results\n[Input] Okapis: {}    Trees: {}    Predators: {}    Hunters: {}'.format(args.okapis,args.trees,args.predators,args.hunters),fontsize=12)
 fig.canvas.set_window_title('OKAPI Simulator')
 
-# Population over time graph
-axs[1].set_title('Cycle vs. Population')
-axs[1].set_xlabel('Cycle')
-axs[1].set_ylabel('Population')
-axs[1].set_facecolor('#000000')
+# Anchor points to help the display of the plots
+ax1Anchors = {
+'x':[0,max(allSpeeds[-1]),0,max(allSpeeds[-1])],
+'y':[0,0,max(allWeights[-1]),max(allWeights[-1])]
+}
+
+ax2Anchors = {
+'x':[0,max(indexes),0,max(indexes)],
+'y':[0,0,max(allPopulations),max(allPopulations)]
+}
 
 cont = 0
-finalAnimationCycle = FuncAnimation(plt.gcf(),animateFinal,interval=100)
+finalAnimationCycle = FuncAnimation(plt.gcf(),animateFinal,interval=1,cache_frame_data=False)
 
-print("\n|| Showing final results...")
+print("\n|| Final Stats:")
+finalSpeeds = []
+finalWeights = []
+
+for okapi in terrain.individuals:
+	finalSpeeds.append(okapi.speed)
+	finalWeights.append(okapi.weight)
+
+print('__________________________________________________\n\t    Final Speeds Analisis')
+printStats(finalSpeeds)
+print('\n__________________________________________________\n\t    Final Weights Analisis')
+printStats(finalWeights)
+print('__________________________________________________\n')
+
+print("\n|| Showing final results via plot animation...")
 plt.show()
-print("\n|| Closed.\n")
+print("\n|| Closed.")
+
+print("\n|| OKAPISIM terminated.\n\n")
 
