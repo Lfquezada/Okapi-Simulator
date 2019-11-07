@@ -262,7 +262,8 @@ class Terrain:
 
 						if (individual.xPos in huntXRange and individual.yPos in huntYRange):
 							# death by a hunter
-							self.individuals.remove(individual)
+							if individual in self.individuals:
+								self.individuals.remove(individual)
 							self.totalDeaths += 1 # to keep track of deaths
 							individualKilled = True
 							hunter.lastHuntCycle = self.cycle
@@ -296,7 +297,7 @@ class Terrain:
 
 			if not individualKilled:
 				# Chance for reproduction depending on rFactor
-				probabilityFactor = random.randint(1,1000)
+				probabilityFactor = random.randint(1,1000
 				if probabilityFactor <= individual.rFactor: 
 					# successful reproduction, child spawns near
 					self.individuals.append(Okapi(1,200,initReplicationFactor,initDeathFactor,individual.xPos,individual.yPos))
@@ -389,7 +390,7 @@ def animate(frame,terrain):
 
 # Global function that draws the final results animated (GUI)
 def animateFinal(i):
-	global finalAnimationCycle, allSpeeds, allWeights, allPopulations, indexes, cont, fig, axs, ax1Anchors, ax2Anchors
+	global finalAnimationCycle, allSpeeds, allWeights, allPopulations, indexes, cont, fig, axs, ax1Anchors, ax2Anchors, color
 
 	# clear previous graphed data and update the title display
 	axs[0].cla()
@@ -410,8 +411,8 @@ def animateFinal(i):
 	axs[1].scatter(ax2Anchors['x'],ax2Anchors['y'],c='#000000',alpha=0.0)
 
 	# Plot the data
-	axs[0].scatter(allSpeeds[cont],allWeights[cont],c='#3AFF00',marker='.',s=100,alpha=0.2)
-	axs[1].fill_between(indexes[0:cont+1],allPopulations[0:cont+1],0,color='#3AFF00',alpha=0.5)
+	axs[0].scatter(allSpeeds[cont],allWeights[cont],c=color,marker='.',s=100,alpha=0.2)
+	axs[1].fill_between(indexes[0:cont+1],allPopulations[0:cont+1],0,color=color,alpha=0.5)
 
 	if cont == (len(allSpeeds)-1):
 		finalAnimationCycle.event_source.stop()
@@ -471,8 +472,8 @@ fig.canvas.set_window_title('OKAPI Simulator')
 
 # Anchor points to help the display of the plots
 ax1Anchors = {
-'x':[0,max(allSpeeds[-1]),0,max(allSpeeds[-1])],
-'y':[0,0,max(allWeights[-1]),max(allWeights[-1])]
+'x':[0,6,0,6],
+'y':[0,0,400,400]
 }
 
 ax2Anchors = {
@@ -481,6 +482,14 @@ ax2Anchors = {
 }
 
 cont = 0
+# Color mapping for final plots
+if len(terrain.individuals) == 0:
+	color = '#ff201c' # if extinct sets a red color on final results plots
+if len(terrain.individuals) in range(1,int(args.okapis)):
+	color = '#ffe600' # final population less than init population, sets a yellow warning color on final results plots
+if len(terrain.individuals) >= int(args.okapis):
+	color = '#3AFF00' # final population greater than init population, sets a green color
+	
 finalAnimationCycle = FuncAnimation(plt.gcf(),animateFinal,interval=1,cache_frame_data=False)
 
 print("\n|| Final Stats:")
@@ -491,10 +500,16 @@ for okapi in terrain.individuals:
 	finalSpeeds.append(okapi.speed)
 	finalWeights.append(okapi.weight)
 
-print('__________________________________________________\n\t    Final Speeds Analisis')
-printStats(finalSpeeds)
-print('\n__________________________________________________\n\t    Final Weights Analisis')
-printStats(finalWeights)
+if len(terrain.individuals) != 0:
+	print('__________________________________________________\n\t    Final Speeds')
+	printStats(finalSpeeds)
+	print('\n__________________________________________________\n\t    Final Weights')
+	printStats(finalWeights)
+else:
+	print('\n\t Species EXTINCT')
+
+print('\n__________________________________________________\n\t    Population Stats')
+print(' ALIVE:   {}\n DEATHS:  {}\n BIRTHS:  {}'.format(len(terrain.individuals),terrain.totalDeaths,terrain.totalBirths))
 print('__________________________________________________\n')
 
 print("\n|| Showing final results via plot animation...")
