@@ -297,7 +297,7 @@ class Terrain:
 
 			if not individualKilled:
 				# Chance for reproduction depending on rFactor
-				probabilityFactor = random.randint(1,1000
+				probabilityFactor = random.randint(1,1000)
 				if probabilityFactor <= individual.rFactor: 
 					# successful reproduction, child spawns near
 					self.individuals.append(Okapi(1,200,initReplicationFactor,initDeathFactor,individual.xPos,individual.yPos))
