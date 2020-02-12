@@ -2,12 +2,6 @@
 Universidad del Valle de Guatemala
 Proyecto de Biologia General
 Simulador de Okapi
-
-Integrantes: 
-- Luis Quezada
-- Jennifer Sandoval
-- Esteban del Valle
-- Andrea Paniagua
 '''
 
 # Modulos a usar
