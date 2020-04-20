@@ -20,7 +20,4 @@ python3 okapisim.py [okapis] [trees] [leopards] [hunters] [cycles to simulate]
 ```
 
 ## Author
-* **Luis Quezada** - *18028*
-* **Jennifer Sandoval** - *18962*
-* **Esteban del Valle** - *18221*
-* **Andrea Paniagua** - *18733*
+* **Luis Quezada**
