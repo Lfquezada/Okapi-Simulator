@@ -4,17 +4,12 @@ A simulator for a population of Okapi and their dependence for external factors 
 ## Algorithm for a population simulator.
 
 ## Requirements
-- Install Python3
-- Install Modules
-```
-pip3 install numpy
-pip3 install scipy
-pip3 install matplotlib
-```
+* Python 3.x
+* Numpy
+* Scipy
+* Matplotlib
 
-## HOW TO USE
-
-1. Run *okapisim.py*
+## Usage
 ```
 python3 okapisim.py [okapis] [trees] [leopards] [hunters] [cycles to simulate]
 ```
