@@ -1,7 +1,18 @@
 # Okapi-Simulator
 A simulator for a population of Okapi and their dependence for external factors such as hunger, predators and hunters.
 
-## Algorithm for a population simulator.
+# Simulation
+<p align="center">
+  <img src="https://github.com/Lfquezada/Okapi-Simulator/blob/master/examples/results1.png" width="200">
+  <img src="https://github.com/Lfquezada/Okapi-Simulator/blob/master/examples/results2.png" width="200">
+  <img src="https://github.com/Lfquezada/Okapi-Simulator/blob/master/examples/results3.png" width="200">
+</p>
+
+<p align="center">
+  <img src="https://github.com/Lfquezada/Okapi-Simulator/blob/master/examples/example1.png" width="200">
+  <img src="https://github.com/Lfquezada/Okapi-Simulator/blob/master/examples/example2.png" width="200">
+</p>
+
 
 ## Requirements
 * Python 3.x
