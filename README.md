@@ -9,8 +9,7 @@ A simulator for a population of Okapi and their dependence for external factors 
 </p>
 
 <p align="center">
-  <img src="https://github.com/Lfquezada/Okapi-Simulator/blob/master/examples/example1.png" width="300">
-  <img src="https://github.com/Lfquezada/Okapi-Simulator/blob/master/examples/example2.png" width="300">
+  <img src="https://github.com/Lfquezada/Okapi-Simulator/blob/master/examples/example1.png" width="500">
 </p>
 
 
